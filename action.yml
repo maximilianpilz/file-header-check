@@ -36,7 +36,5 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
-      shell: bash
-    - run: python check.py ${{ inputs.config }} -e ${{ inputs.config-encoding }} -ll ${{ inputs.log-level }}
+    - run: python ${{ github.action_path }}/check.py ${{ inputs.config }} -e ${{ inputs.config-encoding }} -ll ${{ inputs.log-level }}
       shell: bash
