@@ -16,6 +16,9 @@
 
 name: 'file-header-check'
 description: 'GitHub action to check whether specified files contain a header matching a given regular expression'
+branding:
+  color: green
+  icon: file-text
 inputs:
   config:
     description: 'The config file to be used'
