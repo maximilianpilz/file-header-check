@@ -59,6 +59,8 @@ def scan(file_name_pattern: str,
 
         if pathlib.Path(file_to_scan).is_file():
 
+            LOGGER.debug(f'Checking file "{file_to_scan}"')
+
             try:
                 with open(file_to_scan, 'rt', encoding=file_header_encoding) as file_to_scan_obj:
                     match = regex.search(string=file_to_scan_obj.read())
@@ -91,11 +93,14 @@ def scan(file_name_pattern: str,
 
             LOGGER.debug(f'Ignoring the pathname "{file_to_scan}" since it is not a file.')
 
+    if not local_results:
+        LOGGER.error(f'No results for the pathnames of "{file_name_pattern}"')
+
     return bool(local_results) and all(local_results)
 
 
 def configure_logger(log_level: int) -> None:
-    stream_handler = logging.StreamHandler(stream=sys.stdout)
+    stream_handler = logging.StreamHandler()
     stream_handler.setLevel(log_level)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     stream_handler.setFormatter(formatter)
@@ -137,15 +142,23 @@ if __name__ == '__main__':
     results = list()
 
     for section in config.sections():
+        LOGGER.debug(f'Reading section "{section}"')
         file_name_pattern_var = config.get(section=section, option='file_name_pattern')
         file_header_encoding_var = config.get(section=section, option='file_header_encoding')
         header_regex_file_name_var = config.get(section=section, option='header_regex_file')
         header_regex_file_encoding_var = config.get(section=section, option='header_regex_file_encoding')
 
-        results.append(scan(file_name_pattern=file_name_pattern_var,
-                            file_header_encoding=file_header_encoding_var,
-                            header_regex_file_name=header_regex_file_name_var,
-                            header_regex_file_encoding=header_regex_file_encoding_var))
+        scan_result = scan(file_name_pattern=file_name_pattern_var,
+                           file_header_encoding=file_header_encoding_var,
+                           header_regex_file_name=header_regex_file_name_var,
+                           header_regex_file_encoding=header_regex_file_encoding_var)
+        results.append(scan_result)
+        if not scan_result:
+            LOGGER.error(f'Failed at section "{section}".')
+
+    if not results:
+        assert not config.sections()
+        LOGGER.error('No section results, because there were no sections')
 
     overall_result = (bool(results) and all(results))
 
