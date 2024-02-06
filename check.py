@@ -95,7 +95,7 @@ def scan(file_name_pattern: str,
 
 
 def configure_logger(log_level: int) -> None:
-    stream_handler = logging.StreamHandler()
+    stream_handler = logging.StreamHandler(stream=sys.stdout)
     stream_handler.setLevel(log_level)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     stream_handler.setFormatter(formatter)
