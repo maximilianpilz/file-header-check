@@ -37,4 +37,6 @@ runs:
       with:
         python-version: '3.12'
     - run: python ${{ github.action_path }}/check.py ${{ inputs.config }} -e ${{ inputs.config-encoding }} -ll ${{ inputs.log-level }}
+      env:
+        PYTHONUNBUFFERED: "1"
       shell: bash
