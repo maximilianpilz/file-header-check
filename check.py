@@ -45,8 +45,11 @@ def scan(file_name_pattern: str,
     """
 
     try:
+        LOGGER.debug(f'Attempting to read in and compile the header regex from "{header_regex_file_name}" '
+                     f'with the encoding "{header_regex_file_encoding}.')
         with open(header_regex_file_name, 'rt', encoding=header_regex_file_encoding) as header_regex_file_obj:
             regex = re.compile(header_regex_file_obj.read())
+        LOGGER.debug(f'Successfully read in and compiled the header regex from "{header_regex_file_name}".')
     except UnicodeDecodeError:
         LOGGER.error(f'Unable to decode the file "{header_regex_file_name}" as "{header_regex_file_encoding}".')
         return False
@@ -136,8 +139,9 @@ if __name__ == '__main__':
                            f'will use the default value i.e. "WARNING" instead. '
                            f'Consider that the log level value is case sensitive.')
 
+    config_file_name = args.config
     config = configparser.ConfigParser()
-    files = config.read(filenames=[args.config], encoding=args.encoding)
+    files = config.read(filenames=[config_file_name], encoding=args.encoding)
 
     results = list()
 
@@ -158,7 +162,13 @@ if __name__ == '__main__':
 
     if not results:
         assert not config.sections()
-        LOGGER.error('No section results, because there were no sections')
+        if not pathlib.Path(config_file_name).is_file():
+            additional_error_info = f' This is because the path {config_file_name}' \
+                                    f' could not be found or ' \
+                                    f'the path {config_file_name} is not a regular file.'
+        else:
+            additional_error_info = ''
+        LOGGER.error('No section results, because there were no sections.' + additional_error_info)
 
     overall_result = (bool(results) and all(results))
 
